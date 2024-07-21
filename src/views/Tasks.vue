@@ -18,9 +18,9 @@
       <div v-else>
         <div
           v-for="task in tasks"
-          :key="task.id"
+          :key="task._id"
           class="task-item"
-          @click="goToTaskDetail(task.id)"
+          @click="goToTaskDetail(task._id)"
         >
           <h3>{{ task.title }}</h3>
           <p>Status: {{ task.status }}</p>
@@ -30,24 +30,25 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import axios from '@/api/axios';
+import { Task } from '@/interfaces/tasks.interface';
 
-const tasks = ref([]);
+const tasks = ref<Task[]>([]); 
 const router = useRouter();
 
 const fetchTasks = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/tasks');
+    const response = await axios.get('/tasks');
     tasks.value = response.data;
   } catch (error) {
     console.error('Error fetching tasks:', error);
   }
 };
 
-const goToTaskDetail = (id) => {
+const goToTaskDetail = (id: string) => {
   router.push(`/tasks/${id}`);
 };
 

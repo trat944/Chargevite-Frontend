@@ -34,9 +34,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-import axios from 'axios';
+import axios from '@/api/axios';
+import { Task } from '@/interfaces/tasks.interface';
 
 const title = ref('');
 const description = ref('');
@@ -45,13 +46,14 @@ const confirmationMessage = ref('');
 
 const submitTask = async () => {
   try {
-    const newTask = {
+    const newTask: Task = {
       title: title.value,
       description: description.value,
       status: status.value,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      _id: ''
     };
-    await axios.post('http://localhost:3000/tasks', newTask);
+    await axios.post('/tasks', newTask);
     confirmationMessage.value = 'The task has been created successfully!';
     
     title.value = '';

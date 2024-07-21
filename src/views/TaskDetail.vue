@@ -5,31 +5,36 @@
       <p><strong>Description:</strong> {{ task.description }}</p>
       <p><strong>Status:</strong> {{ task.status }}</p>
       <p><strong>Created At:</strong> {{ new Date(task.createdAt).toLocaleDateString() }}</p>
+      <button class="delete-button" @click="deleteTask">Delete Task</button>
+      <p v-if="deleteMessage" class="delete-message">{{ deleteMessage }}</p>
     </section>
     
     <section v-else>
       <p>Error displaying the task</p>
     </section>
-
-    <button class="delete-button" @click="deleteTask">Delete Task</button>
-    <p v-if="deleteMessage" class="delete-message">{{ deleteMessage }}</p>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import axios from '@/api/axios';
+import { Task } from '@/interfaces/tasks.interface';
 
 const route = useRoute();
 const router = useRouter();
-const taskId = route.params.id;
-const task = ref(null);
+const taskId = route.params.id; 
+const task = ref<Task | null>(null);
 const deleteMessage = ref('');
 
 const fetchTaskDetails = async () => {
+  if (!taskId) {
+    console.error('Task ID is undefined');
+    return;
+  }
+
   try {
-    const response = await axios.get(`http://localhost:3000/tasks/${taskId}`);
+    const response = await axios.get<Task>(`/tasks/${taskId}`);
     task.value = response.data;
   } catch (error) {
     console.error('Error fetching task details:', error);
@@ -37,8 +42,13 @@ const fetchTaskDetails = async () => {
 };
 
 const deleteTask = async () => {
+  if (!taskId) {
+    console.error('Task ID is undefined');
+    return;
+  }
+
   try {
-    await axios.delete(`http://localhost:3000/tasks/${taskId}`);
+    await axios.delete(`/tasks/${taskId}`);
     deleteMessage.value = 'The task has been deleted';
     setTimeout(() => {
       router.push('/tasks');
