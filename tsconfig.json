@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    // otras opciones
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.vue",
+  ]
+}
