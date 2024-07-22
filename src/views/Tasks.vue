@@ -15,12 +15,12 @@
       <div v-if="tasks.length === 0">
         <p>No tasks available yet.</p>
       </div>
-      <div v-else>
+      <div v-else class="task-grid">
         <div
           v-for="task in tasks"
           :key="task._id"
           class="task-item"
-          @click="goToTaskDetail(task._id)"
+          @click="goToTaskDetail(task._id!)"
         >
           <h3>{{ task.title }}</h3>
           <p>Status: {{ task.status }}</p>
@@ -29,6 +29,7 @@
     </section>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
@@ -55,9 +56,10 @@ const goToTaskDetail = (id: string) => {
 onMounted(fetchTasks);
 </script>
 
+
 <style scoped>
 .tasks-container {
-  max-width: 800px;
+  max-width: 90%;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -91,7 +93,17 @@ onMounted(fetchTasks);
   color: #a5a3a3;
 }
 
+.task-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
 .task-item {
+  flex: 1 1 28%; 
+  max-width: 28%;
+  min-width: 250px;
   padding: 1rem;
   margin: 1rem 0;
   background-color: #f9f9f9;
@@ -112,5 +124,19 @@ onMounted(fetchTasks);
 
 .link:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .task-item {
+    flex: 1 1 45%; 
+    max-width: 45%;
+  }
+}
+
+@media (max-width: 480px) {
+  .task-item {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
 }
 </style>

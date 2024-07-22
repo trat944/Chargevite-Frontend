@@ -51,7 +51,6 @@ const submitTask = async () => {
       description: description.value,
       status: status.value,
       createdAt: new Date().toISOString(),
-      _id: ''
     };
     await axios.post('/tasks', newTask);
     confirmationMessage.value = 'The task has been created successfully!';

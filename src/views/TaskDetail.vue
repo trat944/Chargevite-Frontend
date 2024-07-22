@@ -1,12 +1,32 @@
 <template>
   <div class="task-detail-container">
     <section v-if="task" class="task-detail">
-      <h1>{{ task.title }}</h1>
-      <p><strong>Description:</strong> {{ task.description }}</p>
-      <p><strong>Status:</strong> {{ task.status }}</p>
-      <p><strong>Created At:</strong> {{ new Date(task.createdAt).toLocaleDateString() }}</p>
-      <button class="delete-button" @click="deleteTask">Delete Task</button>
-      <p v-if="deleteMessage" class="delete-message">{{ deleteMessage }}</p>
+      <div class="task-info">
+        <h1>{{ task.title }}</h1>
+        <button @click="editTitle = !editTitle" class="edit-button">Edit</button>
+      </div>
+      <div v-if="editTitle">
+        <input v-model="newTitle" placeholder="New title" />
+        <button @click="updateTask('title')">Save</button>
+      </div>
+      <div class="task-info">
+        <p><strong>Description:</strong> {{ task.description }}</p>
+        <button @click="editDescription = !editDescription" class="edit-button">Edit</button>
+      </div>
+      <div v-if="editDescription">
+        <textarea v-model="newDescription" placeholder="New description"></textarea>
+        <button @click="updateTask('description')">Save</button>
+      </div>
+      <div class="task-info">
+        <p><strong>Status:</strong> {{ task.status }}</p>
+      </div>
+      <div class="task-info">
+        <p><strong>Created At:</strong> {{ new Date(task.createdAt).toLocaleDateString() }}</p>
+      </div>
+      <div class="delete-button-container">
+        <button class="delete-button" @click="deleteTask">Delete Task</button>
+        <p v-if="deleteMessage" class="delete-message">{{ deleteMessage }}</p>
+      </div>
     </section>
     
     <section v-else>
@@ -14,6 +34,7 @@
     </section>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
@@ -23,30 +44,26 @@ import { Task } from '@/interfaces/tasks.interface';
 
 const route = useRoute();
 const router = useRouter();
-const taskId = route.params.id; 
+const taskId = route.params.id;
 const task = ref<Task | null>(null);
 const deleteMessage = ref('');
+const editTitle = ref(false);
+const editDescription = ref(false);
+const newTitle = ref('');
+const newDescription = ref('');
 
 const fetchTaskDetails = async () => {
-  if (!taskId) {
-    console.error('Task ID is undefined');
-    return;
-  }
-
   try {
     const response = await axios.get<Task>(`/tasks/${taskId}`);
     task.value = response.data;
+    newTitle.value = task.value.title;
+    newDescription.value = task.value.description;
   } catch (error) {
     console.error('Error fetching task details:', error);
   }
 };
 
 const deleteTask = async () => {
-  if (!taskId) {
-    console.error('Task ID is undefined');
-    return;
-  }
-
   try {
     await axios.delete(`/tasks/${taskId}`);
     deleteMessage.value = 'The task has been deleted';
@@ -58,30 +75,83 @@ const deleteTask = async () => {
   }
 };
 
+const updateTask = async (field: string) => {
+  try {
+    const updateData: Partial<Task> = {};
+    if (field === 'title') {
+      updateData.title = newTitle.value;
+      editTitle.value = false;
+    } else if (field === 'description') {
+      updateData.description = newDescription.value;
+      editDescription.value = false;
+    }
+    await axios.patch(`/tasks/${taskId}`, updateData);
+    fetchTaskDetails();
+  } catch (error) {
+    console.error(`Error updating task ${field}:`, error);
+  }
+};
+
 onMounted(fetchTaskDetails);
 </script>
+
 
 <style scoped>
 .task-detail-container {
   max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  margin: 2rem auto;
+  padding: 3rem;
+  background-color: #101D26;
+  border-radius: 20px;
+  opacity: 0.7;
 }
 
 .task-detail {
   margin-bottom: 2rem;
 }
 
-.task-detail h1 {
-  font-size: 2.5rem;
-  color: #42b983;
+.task-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
-.task-detail p {
-  font-size: 1.25rem;
+.task-info h1,
+.task-info p {
   color: #a5a3a3;
+  margin: 0;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.task-info p strong {
+  color: #35495e;
+}
+
+.edit-button {
+  background-color: #42b983;
+  margin-left: 1rem;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-button:hover {
+  background-color: #36a573;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.5rem;
   margin: 0.5rem 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
 }
 
 .delete-button {
@@ -97,6 +167,10 @@ onMounted(fetchTaskDetails);
 
 .delete-button:hover {
   background-color: #d62828;
+}
+
+.delete-button-container {
+  margin: 2rem 0;
 }
 
 .delete-message {
