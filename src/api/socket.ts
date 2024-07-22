@@ -7,7 +7,6 @@ socket.onopen = () => {
 socket.onmessage = (event) => {
   const data = JSON.parse(event.data);
   console.log('Received:', data);
-  // Handle received data here
 };
 
 socket.onerror = (error) => {
