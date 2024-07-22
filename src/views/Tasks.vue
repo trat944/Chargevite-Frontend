@@ -11,6 +11,7 @@
     </section>
 
     <section class="tasks-list">
+      <h2>Task List</h2>
       <div v-if="tasks.length === 0">
         <p>No tasks available yet.</p>
       </div>
@@ -68,6 +69,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '@/api/axios';
+import socket from '@/api/socket';
 import { Task } from '@/interfaces/tasks.interface';
 
 const tasks = ref<Task[]>([]); 
@@ -89,6 +91,20 @@ const goToTaskDetail = (id: string) => {
 const pendingTasks = computed(() => tasks.value.filter(task => task.status === 'pending'));
 const inProgressTasks = computed(() => tasks.value.filter(task => task.status === 'in progress'));
 const completedTasks = computed(() => tasks.value.filter(task => task.status === 'completed'));
+
+socket.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.event === 'taskCreated') {
+    tasks.value.push(data.data);
+  } else if (data.event === 'taskUpdated') {
+    const index = tasks.value.findIndex(task => task._id === data.data._id);
+    if (index !== -1) {
+      tasks.value[index] = data.data;
+    }
+  } else if (data.event === 'taskDeleted') {
+    tasks.value = tasks.value.filter(task => task._id !== data.data);
+  }
+};
 
 onMounted(fetchTasks);
 </script>
@@ -176,4 +192,5 @@ onMounted(fetchTasks);
   }
 }
 </style>
+
 

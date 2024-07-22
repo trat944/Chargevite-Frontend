@@ -1,24 +1,21 @@
-import { io } from 'socket.io-client';
+const socket = new WebSocket(import.meta.env.VITE_API_URL); 
 
-const socket = io(import.meta.env.VITE_API_URL); 
-
-socket.on('connect', () => {
+socket.onopen = () => {
   console.log('Connected to WebSocket server');
-});
+};
 
-socket.on('taskCreated', (task) => {
-  console.log('New task created:', task);
-  // Aquí puedes añadir lógica para actualizar el estado de la aplicación
-});
+socket.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Received:', data);
+  // Handle received data here
+};
 
-socket.on('taskUpdated', (task) => {
-  console.log('Task updated:', task);
-  // Aquí puedes añadir lógica para actualizar el estado de la aplicación
-});
+socket.onerror = (error) => {
+  console.error('WebSocket error:', error);
+};
 
-socket.on('taskDeleted', (taskId) => {
-  console.log('Task deleted:', taskId);
-  // Aquí puedes añadir lógica para actualizar el estado de la aplicación
-});
+socket.onclose = () => {
+  console.log('WebSocket connection closed');
+};
 
 export default socket;
