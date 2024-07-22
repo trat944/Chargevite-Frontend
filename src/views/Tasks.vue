@@ -11,28 +11,61 @@
     </section>
 
     <section class="tasks-list">
-      <h2>Task List</h2>
       <div v-if="tasks.length === 0">
         <p>No tasks available yet.</p>
       </div>
-      <div v-else class="task-grid">
-        <div
-          v-for="task in tasks"
-          :key="task._id"
-          class="task-item"
-          @click="goToTaskDetail(task._id!)"
-        >
-          <h3>{{ task.title }}</h3>
-          <p>Status: {{ task.status }}</p>
+      <div v-else>
+        <div v-if="pendingTasks.length > 0">
+          <h3>Pending</h3>
+          <div class="task-grid">
+            <div
+              v-for="task in pendingTasks"
+              :key="task._id"
+              class="task-item"
+              @click="goToTaskDetail(task._id!)"
+            >
+              <h3>{{ task.title }}</h3>
+              <p>Status: {{ task.status }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="inProgressTasks.length > 0">
+          <h3>In Progress</h3>
+          <div class="task-grid">
+            <div
+              v-for="task in inProgressTasks"
+              :key="task._id"
+              class="task-item"
+              @click="goToTaskDetail(task._id!)"
+            >
+              <h3>{{ task.title }}</h3>
+              <p>Status: {{ task.status }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="completedTasks.length > 0">
+          <h3>Completed</h3>
+          <div class="task-grid">
+            <div
+              v-for="task in completedTasks"
+              :key="task._id"
+              class="task-item"
+              @click="goToTaskDetail(task._id!)"
+            >
+              <h3>{{ task.title }}</h3>
+              <p>Status: {{ task.status }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </div>
 </template>
 
-
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '@/api/axios';
 import { Task } from '@/interfaces/tasks.interface';
@@ -53,9 +86,12 @@ const goToTaskDetail = (id: string) => {
   router.push(`/tasks/${id}`);
 };
 
+const pendingTasks = computed(() => tasks.value.filter(task => task.status === 'pending'));
+const inProgressTasks = computed(() => tasks.value.filter(task => task.status === 'in progress'));
+const completedTasks = computed(() => tasks.value.filter(task => task.status === 'completed'));
+
 onMounted(fetchTasks);
 </script>
-
 
 <style scoped>
 .tasks-container {
@@ -83,7 +119,7 @@ onMounted(fetchTasks);
   margin-top: 2rem;
 }
 
-.tasks-list h2 {
+.tasks-list h2, .tasks-list h3 {
   font-size: 2rem;
   color: #35495e;
 }
@@ -140,3 +176,4 @@ onMounted(fetchTasks);
   }
 }
 </style>
+
