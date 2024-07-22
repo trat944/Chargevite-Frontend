@@ -19,6 +19,15 @@
       </div>
       <div class="task-info">
         <p><strong>Status:</strong> {{ task.status }}</p>
+        <button @click="editStatus = !editStatus" class="edit-button">Edit</button>
+      </div>
+      <div v-if="editStatus">
+        <select v-model="newStatus">
+          <option value="pending">Pending</option>
+          <option value="in progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+        <button @click="updateTask('status')">Save</button>
       </div>
       <div class="task-info">
         <p><strong>Created At:</strong> {{ new Date(task.createdAt).toLocaleDateString() }}</p>
@@ -49,8 +58,10 @@ const task = ref<Task | null>(null);
 const deleteMessage = ref('');
 const editTitle = ref(false);
 const editDescription = ref(false);
+const editStatus = ref(false);
 const newTitle = ref('');
 const newDescription = ref('');
+const newStatus = ref('');
 
 const fetchTaskDetails = async () => {
   try {
@@ -58,6 +69,7 @@ const fetchTaskDetails = async () => {
     task.value = response.data;
     newTitle.value = task.value.title;
     newDescription.value = task.value.description;
+    newStatus.value = task.value.status;
   } catch (error) {
     console.error('Error fetching task details:', error);
   }
@@ -84,6 +96,9 @@ const updateTask = async (field: string) => {
     } else if (field === 'description') {
       updateData.description = newDescription.value;
       editDescription.value = false;
+    } else if (field === 'status') {
+      updateData.status = newStatus.value;
+      editStatus.value = false;
     }
     await axios.patch(`/tasks/${taskId}`, updateData);
     fetchTaskDetails();
@@ -146,7 +161,8 @@ onMounted(fetchTaskDetails);
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   padding: 0.5rem;
   margin: 0.5rem 0;
